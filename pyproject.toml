@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "claude-codex-review-loop"
+version = "0.5.0"
+description = "Experimental Codex implementation with independent Claude review and audit"
+requires-python = ">=3.9"
+dependencies = []
+
+[project.scripts]
+review-loop = "review_loop.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

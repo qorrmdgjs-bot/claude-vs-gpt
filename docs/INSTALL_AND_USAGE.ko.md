@@ -1,150 +1,115 @@
-# 다운로드 및 사용 안내 (macOS / Windows)
+# 다운로드·설치·사용 안내
 
-작성일: 2026-10-24
+2026-10-24 / v0.5 실험판. Mac 실제 CLI 검증. Windows 실제 검증 대기.
 
-> 현재는 설계 문서만 제공됩니다. 실행 가능한 Python 패키지, 설치 스크립트, SKILL.md, 배포 릴리스는 아직 없습니다. 저장소를 다운로드해도 자동 검증 시스템을 실행할 수 없습니다. 이 문서는 지금 가능한 다운로드 절차와 구현 후 제공할 사용 흐름을 구분합니다.
+## 다운로드
 
-## 1. 지금 다운로드하기
+GitHub에서 실제 구현이 포함된 PR 브랜치를 선택해 Code → Download ZIP으로 받거나 제공된 소스 ZIP을 풉니다. main 병합 전에는 main에 코드가 없을 수 있습니다. 아직 게시하지 않은 로컬 구현은 GitHub에서 다운로드할 수 없습니다. 새 폴더를 사용하고 기존 파일은 덮어쓰지 않습니다.
 
-### 방법 A: GitHub에서 ZIP 다운로드
+## Python CLI 설치
 
-1. [설계 문서 브랜치](https://github.com/qorrmdgjs-bot/claude-vs-gpt/tree/docs/review-loop-plan)를 엽니다.
-2. 브랜치가 `docs/review-loop-plan`인지 확인합니다.
-3. **Code → Download ZIP**을 선택합니다.
-4. 개인 개발용 폴더에 압축을 풉니다.
-5. `docs/PLAN.ko.md`와 이 안내 문서를 읽습니다.
+Python 3.9 이상을 준비하고 프로젝트 루트에서 실행합니다.
 
-이 문서는 PR 검토 중인 브랜치에 있습니다. main 병합 전에는 main을 다운로드하면 설계 문서가 없을 수 있습니다. 향후 배포 시에는 검증된 태그 또는 릴리스를 기준으로 설치 절차를 갱신합니다.
+macOS:
 
-### 방법 B: Git으로 다운로드
-
-Git이 설치되어 있다면 macOS 터미널과 Windows PowerShell에서 같은 명령을 사용할 수 있습니다.
-
-```text
-git clone --branch docs/review-loop-plan --single-branch https://github.com/qorrmdgjs-bot/claude-vs-gpt.git
-cd claude-vs-gpt
+```sh
+python3 -m venv .venv
+.venv/bin/python -m pip install .
+.venv/bin/review-loop doctor
 ```
 
-현재 폴더에 이미 `claude-vs-gpt`가 있다면 다른 위치에서 실행하거나 다른 대상 폴더명을 사용합니다. 기존 폴더를 삭제하거나 덮어쓰지 마세요.
+Windows PowerShell (검증 대기):
 
-이미 이 브랜치를 받은 경우 변경 사항을 먼저 확인합니다.
-
-```text
-git status
-git branch --show-current
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install .
+.\.venv\Scripts\review-loop.exe doctor
 ```
 
-작업 내용이 없고 현재 브랜치가 `docs/review-loop-plan`인 경우에만 다음 명령으로 갱신합니다.
+doctor는 설치 여부만 확인하며 인증·옵션 호환성을 보장하지 않습니다. 설치 시 패키징 도구 다운로드가 필요할 수 있으나 런타임 외부 Python 의존성은 없습니다.
+
+## CLI 설치와 로그인
+
+[Codex 공식 안내](https://learn.chatgpt.com/docs/non-interactive-mode)와 [Claude 공식 안내](https://code.claude.com/docs/en/setup)를 따라 별도 설치합니다. 검증한 버전은 Codex CLI 0.162.1, Claude Code 2.1.302입니다. 특히 Claude의 safe-mode·restricted·json-schema 옵션이 필요합니다.
 
 ```text
-git pull --ff-only
+codex login
+codex login status
+claude auth login
+claude auth status
 ```
 
-로컬 수정이 있거나 갱신에 실패하면 강제 초기화하지 말고 변경을 보존한 뒤 원인을 확인합니다. ZIP 다운로드는 자동 갱신되지 않습니다.
+브라우저에서 직접 로그인하고 키·토큰·인증 코드를 공유하지 않습니다. auth status에도 계정 정보가 나올 수 있습니다. 저장된 CLI 로그인을 사용하며 API 키는 기본 상속하지 않습니다. 각 CLI의 기본 모델을 사용하고 금액 상한은 보장하지 않습니다.
 
-## 2. 다운로드와 스킬 설치의 차이
+Windows Codex npm 설치는 알려진 JS 진입점을 직접 실행하며 임의의 .cmd/.bat는 실행하지 않습니다. 조직 정책과 CLI 버전별 차이는 먼저 확인해야 합니다.
 
-저장소 다운로드는 파일을 받는 작업입니다. 스킬 설치는 Codex 또는 Claude가 지침을 발견하도록 등록하는 별도 작업입니다. Python CLI 설치는 실제 실행 관리자를 준비하는 또 다른 작업입니다.
+## 모의 시험
 
-이 프로젝트는 다음 세 요소를 함께 제공할 예정입니다.
+macOS 예시:
 
-| 요소 | 목적 | 현재 상태 |
-| --- | --- | --- |
-| Python CLI | AI 호출, 시간 제한, 상태 저장, 판정 및 중단 통제 | 미구현 |
-| Codex용 스킬 | 구현·수정 흐름을 공통 CLI와 연결 | 미구현 |
-| Claude용 스킬 | 검토·감사 흐름을 공통 CLI와 연결 | 미구현 |
+```sh
+.venv/bin/python -m unittest discover -s tests -v
+.venv/bin/review-loop simulate --scenario success --output /tmp/review-loop-sim-01
+```
 
-Markdown 문서를 스킬 폴더에 복사하는 것만으로 시스템이 구현되지는 않습니다. 지금은 임의의 스킬 경로에 파일을 복사하거나 존재하지 않는 설치 스크립트를 실행하지 않습니다.
+Windows는 .venv\Scripts\python.exe, .venv\Scripts\review-loop.exe 및 $env:TEMP 아래의 새 출력 폴더를 사용합니다. simulate는 AI·작업 프로세스를 호출하지 않습니다. fixture는 고정된 가짜 작업을 실행합니다.
 
-## 3. 구현 후 설치 흐름 (예정)
+## 실제 가상 계산기 실행
 
-아래는 계획이며, 현재 실행할 설치 명령은 아닙니다.
+먼저 examples/calculator.json의 파일·목표·검사 명령을 읽습니다. 검사 명령은 로컬 코드 실행이므로 신뢰하고 승인한 것만 사용합니다.
 
-1. 회사 정책에서 승인한 환경인지 확인합니다.
-2. 지원 버전의 Python과 Git을 준비합니다. 정확한 최소 버전은 구현 시 확정합니다.
-3. Codex CLI와 Claude Code CLI를 각 공식 안내에 따라 별도로 설치하고 인증합니다.
-4. 검증된 프로젝트 릴리스 또는 태그를 다운로드합니다.
-5. 프로젝트 Python CLI를 격리된 환경에 설치합니다.
-6. 설치 도우미로 Codex·Claude 스킬을 등록합니다.
-7. 기존 스킬 파일과 충돌하면 설치를 중단하고 사용자에게 알립니다.
-8. 환경 진단과 가상 프로젝트 시험을 통과한 뒤 실제 작업에 사용합니다.
+macOS:
 
-macOS는 터미널, Windows는 PowerShell을 기본 안내 환경으로 삼습니다. WSL은 선택 사항이며 두 환경의 경로와 인증정보를 혼용하지 않습니다. 구체적인 설치 경로와 명령은 실제 구현 및 양쪽 운영체제 검증 후 추가합니다.
+```sh
+.venv/bin/review-loop run --task examples/calculator.json --output /tmp/review-loop-live-01 --allow-live
+.venv/bin/review-loop status /tmp/review-loop-live-01
+```
 
-공식 참고:
+Windows PowerShell (정책 허용 및 테스트 통과 후):
 
-- [Codex 비대화형 실행](https://learn.chatgpt.com/docs/non-interactive-mode)
-- [Codex Windows](https://learn.chatgpt.com/docs/windows/windows-sandbox)
-- [Claude Code 설치](https://code.claude.com/docs/en/setup)
-- [Claude Code 비대화형 실행](https://code.claude.com/docs/en/headless)
+```powershell
+.\.venv\Scripts\review-loop.exe run --task examples/calculator.json --output "$env:TEMP/review-loop-live-01" --allow-live
+```
 
-CLI 옵션과 인증 방식은 설치 시점의 공식 문서 및 지원 버전과 다시 대조해야 합니다. 이 안내는 특정 구독으로 모든 자동화가 가능하다고 보장하지 않습니다.
+--allow-live는 작업 데이터를 두 서비스로 전송하고 사용량을 소비하는 명시적 선택입니다. 원본 프로젝트 대신 JSON files에 선언한 내용으로 새 workspace를 만듭니다. 새 파일은 시작 전에 선언해야 합니다. 검사 argv에 명시된 스크립트 파일은 원본 내용과 비교해 보호합니다.
 
-## 4. 구현 후 사용 흐름 (예정)
+## 결과·취소·재개
 
-### 작업 시작 전
-
-목표, 완료 기준, 수정 가능한 경로, 금지 대상, 필수 검사 명령을 작성합니다. 처음에는 회사 데이터가 없는 작은 가상 프로젝트로 시험합니다.
-
-도구 저장소와 작업 대상 프로젝트를 분리하고, 실행 기록은 공개 저장소 밖에 저장합니다. 작업 계약은 실행 도중 AI가 임의로 바꾸지 못하도록 보호합니다.
-
-### 명령 예시
-
-> 아래 명령은 설계안이며 아직 동작하지 않습니다.
+실행 폴더에 REPORT.md, workspace/, snapshots/, contract.json, state.json이 생성됩니다. 작업 내용과 구조화 검토 이력이 포함되므로 저장소 밖에 보관합니다. 원본 CLI 출력은 저장하지 않지만 CLI 자체·서비스 측 기록까지 없어지는 것은 아닙니다.
 
 ```text
-review-loop doctor
-review-loop run --task task.md --publish never
-review-loop status
-review-loop cancel <run-id>
-review-loop resume <run-id>
+review-loop cancel <실행 폴더>
+review-loop resume <실행 폴더> --allow-live
 ```
 
-`<run-id>`는 실제 실행 시 발급할 식별자로 대체하는 자리 표시자입니다. 상태 조회·취소·재개의 최종 인자 형식은 구현 시 확정합니다.
+취소는 다른 터미널에서 요청합니다. 재개는 최초 4시간 마감을 유지하고 현재 파일 재검증부터 수행합니다. 만료 후에는 승인된 새 실행이 필요합니다.
 
-### 실행 중
+.lock 또는 active.json이 남으면 관리자·자식 프로세스의 소유권과 종료를 확인해야 합니다. 무조건 삭제하지 않습니다. 비정상 종료 자동 복구는 제공하지 않습니다. 종료 확인이 불가능하면 검토·완료를 금지합니다.
 
-- Codex가 현재 지시 최대 2개를 구현합니다.
-- 1시간 경과 또는 지시 완료 중 먼저 오는 시점에 작업을 정리하고 검토합니다.
-- Claude가 고정된 스냅샷을 검토하고, 별도 Claude 세션이 과정·증거를 감사합니다.
-- Python 관리자가 다음 지시 최대 2개를 전달합니다.
-- 파일 변경 시 기존 승인을 최종 완료 근거로 재사용하지 않습니다.
-- 최초 목표나 완료 기준 변경이 필요하면 사용자에게 확인합니다.
+## 스킬 설치
 
-### 종료와 재개
+프로젝트 루트에서 설치합니다. 기존 review-loop 스킬이 있으면 덮어쓰지 않고 실패합니다. 사용한 Python 경로를 기록하므로 가상환경을 이동·삭제하면 재설치가 필요합니다.
 
-- 최신 코드가 모든 완료 기준·필수 검사·검토·감사를 통과하면 로컬 결과를 보고합니다.
-- 연속 3회 검토에서 진척이 없거나 전체 실행 4시간에 도달하면 중단합니다.
-- 보안 문제·허용 범위 이탈·권한 확대 필요 시 중단합니다.
-- 중단 후 자동 재시작하지 않습니다. 보고서를 확인한 뒤 재개 여부를 결정합니다.
-- 재개 전 외부 파일 변경과 작업 계약을 확인하고 필요한 재검토를 수행합니다.
+macOS:
 
-일반 실행은 GitHub에 자동 푸시하거나 PR을 만들지 않습니다. 게시하려면 결과를 확인하고 별도로 허용해야 합니다.
+```sh
+.venv/bin/python scripts/install_skill.py --destination ~/.agents/skills
+.venv/bin/python scripts/install_skill.py --destination ~/.claude/skills
+```
 
-## 5. 회사 PC에서 지킬 사항
+Windows PowerShell:
 
-- 설치·AI 서비스 사용·회사 데이터 외부 전송이 회사 정책상 허용되는지 확인합니다.
-- 회사 코드·문서·개인정보·원본 로그를 이 공개 저장소에 올리지 않습니다.
-- GitHub에 올리지 않아도 AI 호출 시 내용이 서비스에 전송될 수 있으므로 별도 범위를 정합니다.
-- API 키, 로그인 토큰, 인증 파일을 저장소·작업 파일·명령 예제에 붙여 넣지 않습니다.
-- 인증정보가 테스트나 프로젝트 스크립트에 전달되지 않도록 분리합니다.
-- 도구 설치를 위해 관리자 권한이나 보안 정책 변경이 필요하면 임의로 우회하지 않습니다.
-- 로그를 공유할 때는 원문 대신 민감정보를 제거한 최소 오류 요약을 사용합니다.
+```powershell
+.\.venv\Scripts\python.exe scripts/install_skill.py --destination "$env:USERPROFILE/.agents/skills"
+.\.venv\Scripts\python.exe scripts/install_skill.py --destination "$env:USERPROFILE/.claude/skills"
+```
 
-## 6. 문제 확인
+Codex에서 $review-loop, Claude에서 /review-loop로 호출합니다. 예: “review-loop로 가상 계산기 예제를 실행하고 검토·감사 결과를 알려줘.” PATH에 CLI가 없으면 스킬의 scripts/launch.py가 기록된 Python을 사용합니다. 보이지 않으면 새 세션을 시작합니다. 삭제는 설치된 review-loop 폴더만 확인 후 수행합니다.
 
-| 상황 | 조치 |
-| --- | --- |
-| 다운로드 후 실행 파일이나 SKILL.md가 없음 | 현재 설계 단계이므로 정상입니다. 구현 완료 안내를 기다립니다. |
-| main에 설계 문서가 없음 | PR 병합 여부와 선택 브랜치를 확인합니다. |
-| git 명령을 찾을 수 없음 | ZIP 다운로드를 사용하거나 승인된 방식으로 Git을 설치합니다. |
-| 기존 폴더 또는 스킬과 충돌 | 덮어쓰지 않고 다른 위치를 사용하거나 변경 내용을 확인합니다. |
-| CLI 인증 또는 네트워크 오류 | 향후 doctor 진단과 각 공식 안내를 확인합니다. 인증정보를 로그로 공유하지 않습니다. |
-| 실행이 중단됨 | 로컬 보고서의 원인을 확인합니다. 무조건 반복 재시작하지 않습니다. |
+## 범위와 Windows 확인
 
-## 7. 관련 문서
+작은 신뢰된 가상 작업용입니다. 회사 사용 전 조직 승인·독립 OS 격리·인증정보 접근 차단·외부 전송 정책을 보완해야 합니다. 키 탐지는 휴리스틱이며 검사 코드도 사용자 권한으로 실행됩니다. 일시 오류는 현재 자동 재시도하지 않고 중단합니다. 실제 1시간·4시간 장시간 운전은 시험하지 않았습니다.
 
-- [운영 설계 및 구현 체크리스트](PLAN.ko.md)
-- [설계 문서 PR](https://github.com/qorrmdgjs-bot/claude-vs-gpt/pull/1)
+Windows에서는 정책이 허용되는 시점에 설치·테스트를 먼저 수행합니다. Windows 전용 Job Object 테스트가 건너뛰어지지 않아야 합니다. 성공 후 가상 예제를 시험하고 민감정보 없는 결과만 확인합니다.
 
-구현이 완료되면 이 문서에 검증된 설치 명령, 지원 버전, 스킬 등록·삭제 절차, 실제 실행 예제를 추가합니다.
+[검증 범위](VERIFICATION.ko.md) · [운영 계획](PLAN.ko.md)

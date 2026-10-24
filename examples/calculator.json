@@ -1,0 +1,10 @@
+{
+  "goal": "Implement add(a, b) for integers in answer.py; preserve check.py unchanged.",
+  "criteria": [{"id": "addition", "description": "add handles positive, negative and zero integer inputs", "checks": ["addition_tests"]}],
+  "instructions": ["Implement add(a, b) in answer.py. Do not edit check.py or add files."],
+  "files": {
+    "answer.py": "def add(a, b):\n    raise NotImplementedError\n",
+    "check.py": "from answer import add\nassert add(2, 3) == 5\nassert add(-2, 3) == 1\nassert add(0, 0) == 0\n"
+  },
+  "checks": [{"id": "addition_tests", "argv": ["{python}", "-B", "check.py"]}]
+}
