@@ -1,0 +1,4 @@
+interface:
+  display_name: "Claude–Codex Review Loop"
+  short_description: "Run Codex work with independent Claude review and audit"
+  default_prompt: "Use $review-loop to prepare and run a trusted scratch task with independent Claude review and audit."
